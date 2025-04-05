@@ -42,6 +42,13 @@ end
 
 exports('RegisterGarage', registerGarage)
 
+local function deleteGarage(name)
+    Garages[name] = nil
+    TriggerClientEvent('qbx_garages:client:garageDeleted', -1, name)
+end
+
+exports('DeleteGarage', deleteGarage)
+
 ---Sets the vehicle's garage. It is the caller's responsibility to make sure the vehicle is not currently spawned in the world, or else this may have no effect.
 ---@param vehicleId integer
 ---@param garageName string
@@ -191,7 +198,8 @@ end
 
 lib.callback.register('qbx_garages:server:isParkable', function(source, garage, netId)
     local vehicle = NetworkGetEntityFromNetworkId(netId)
-    local vehicleId = Entity(vehicle).state.vehicleid or exports.qbx_vehicles:GetVehicleIdByPlate(GetVehicleNumberPlateText(vehicle))
+    local vehicleId = Entity(vehicle).state.vehicleid or
+        exports.qbx_vehicles:GetVehicleIdByPlate(GetVehicleNumberPlateText(vehicle))
     return isParkable(source, vehicleId, garage)
 end)
 
@@ -202,7 +210,8 @@ end)
 lib.callback.register('qbx_garages:server:parkVehicle', function(source, netId, props, garage)
     assert(Garages[garage] ~= nil, string.format('Garage %s not found. Did you register this garage?', garage))
     local vehicle = NetworkGetEntityFromNetworkId(netId)
-    local vehicleId = Entity(vehicle).state.vehicleid or exports.qbx_vehicles:GetVehicleIdByPlate(GetVehicleNumberPlateText(vehicle))
+    local vehicleId = Entity(vehicle).state.vehicleid or
+        exports.qbx_vehicles:GetVehicleIdByPlate(GetVehicleNumberPlateText(vehicle))
     local owned = isParkable(source, vehicleId, garage) --Check ownership
     if not owned then
         exports.qbx_core:Notify(source, locale('error.not_owned'), 'error')

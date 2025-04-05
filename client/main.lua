@@ -1,7 +1,7 @@
 local config = require 'config.client'
 if not config.enableClient then return end
 local VEHICLES = exports.qbx_core:GetVehiclesByName()
-
+local garages = {}
 ---@enum ProgressColor
 local ProgressColor = {
     GREEN = 'green.5',
@@ -27,6 +27,7 @@ local VehicleCategory = {
     air = {15, 16},
     sea = {14},
 }
+
 
 ---@param category VehicleType
 ---@param vehicle number
@@ -276,7 +277,7 @@ local function createZones(garageName, garage, accessPoint, accessPointIndex)
     CreateThread(function()
         accessPoint.dropPoint = accessPoint.dropPoint or accessPoint.spawn
         local dropZone, coordsZone
-        lib.zones.sphere({
+        garages[garageName] = lib.zones.sphere({
             coords = accessPoint.coords,
             radius = 15,
             onEnter = function()
@@ -380,6 +381,13 @@ end
 
 RegisterNetEvent('qbx_garages:client:garageRegistered', function(name, garage)
     createGarage(name, garage)
+end)
+
+RegisterNetEvent('qbx_garages:client:garageDeleted', function(name)
+    if garages[name] then
+        garages[name]:remove()
+        garages[name] = nil
+    end
 end)
 
 CreateThread(function()
